@@ -1,0 +1,26 @@
+{
+	"ImportPath": "github.com/iToto/goroku",
+	"GoVersion": "go1.6",
+	"GodepVersion": "v74",
+	"Deps": [
+		{
+			"ImportPath": "github.com/gorilla/context",
+			"Rev": "215affda49addc4c8ef7e2534915df2c8c35c6cd"
+		},
+		{
+			"ImportPath": "github.com/gorilla/mux",
+			"Comment": "v1.1-13-g9fa818a",
+			"Rev": "9fa818a44c2bf1396a17f9d5a3c0f6dd39d2ff8e"
+		},
+		{
+			"ImportPath": "github.com/lib/pq",
+			"Comment": "go1.0-cutoff-101-g55196ec",
+			"Rev": "55196ec83d60d789e27b2627549bf00974a70084"
+		},
+		{
+			"ImportPath": "github.com/lib/pq/oid",
+			"Comment": "go1.0-cutoff-101-g55196ec",
+			"Rev": "55196ec83d60d789e27b2627549bf00974a70084"
+		}
+	]
+}
