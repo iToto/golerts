@@ -1,9 +1,10 @@
 package main
 
 import (
-	"database/sql"
-	// "encoding/json"
+	// "database/sql"
+	"encoding/json"
 	"fmt"
+	"github.com/jmoiron/sqlx"
 	_ "github.com/lib/pq"
 	"log"
 	"net/http"
@@ -13,13 +14,20 @@ import (
 	"github.com/gorilla/mux"
 )
 
-var db *sql.DB
+var db *sqlx.DB
 
-type Foo struct {
-	Bar string
+type User struct {
+	Email    string `db:"email json:"email"`
+	Password string `db:"password" json:"password"`
+	Token    string `db:"token" json:"token"`
 }
 
-func DBConnection() *sql.DB {
+type Notification struct {
+	Message string `db:"message" json:"message"`
+	User    User
+}
+
+func DBConnection() *sqlx.DB {
 	dbURL := os.Getenv("DATABASE_URL")
 
 	if dbURL == "" {
@@ -28,7 +36,7 @@ func DBConnection() *sql.DB {
 		fmt.Println("Connected to database: " + dbURL)
 	}
 
-	db, err := sql.Open("postgres", dbURL)
+	db, err := sqlx.Connect("postgres", dbURL)
 
 	if err != nil {
 		log.Fatal(err)
@@ -50,21 +58,28 @@ func main() {
 	router := mux.NewRouter().StrictSlash(true)
 
 	router.HandleFunc("/", Index)
-	router.HandleFunc("/foo", FooIndex)
-	router.HandleFunc("/foo/{id}", GetFoo).Methods("GET")
-	router.HandleFunc("/foo/{id}", PostFoo).Methods("POST")
+	router.HandleFunc("/user/{id}/unotifications", ListUserNotifications).Methods("GET")
+	router.HandleFunc("/notifications", CreateNotification).Methods("POST")
 	log.Fatal(http.ListenAndServe(":"+port, router))
 }
 
 func Index(w http.ResponseWriter, r *http.Request) {
-	fmt.Fprintln(w, "Hello there and welcome to your service!")
+	fmt.Fprintln(w, "OK")
 }
 
-func FooIndex(w http.ResponseWriter, r *http.Request) {
+func ListUserNotifications(w http.ResponseWriter, r *http.Request) {
+	// Get all notifications for user
+	vars := mux.Vars(r)
+	id, _ := strconv.ParseInt(vars["id"], 10, 0)
+	query := `SELECT * FROM notification n
+	JOIN user u ON u.email = n.user_email
+	WHERE n.user_email = $1`
+	notifications := []Notification{}
+	db.Select(&notifications, query, id)
+
 	w.Header().Set("Content-Type", "application/json")
 
-	// jsonString, _ := json.Marshal(foos)
-	jsonString := []byte(`{"foo":"bar"}`)
+	jsonString, _ := json.Marshal(notifications)
 
 	w.Write(jsonString)
 }
@@ -85,6 +100,6 @@ func GetFoo(w http.ResponseWriter, r *http.Request) {
 	fmt.Fprintln(w, "Foo show:", foo)
 }
 
-func PostFoo(w http.ResponseWriter, r *http.Request) {
+func CreateNotification(w http.ResponseWriter, r *http.Request) {
 	// TODO
 }
