@@ -9,7 +9,6 @@ import (
 	"log"
 	"net/http"
 	"os"
-	"strconv"
 
 	"github.com/gorilla/mux"
 )
@@ -17,14 +16,22 @@ import (
 var db *sqlx.DB
 
 type User struct {
+	Id       string `db:"id json:"id"`
 	Email    string `db:"email json:"email"`
 	Password string `db:"password" json:"password"`
-	Token    string `db:"token" json:"token"`
 }
 
 type Notification struct {
+	Id      string `db:"id json:"id"`
 	Message string `db:"message" json:"message"`
 	User    User
+}
+
+type Token struct {
+	Id     string `db:"id json:"id"`
+	Token  string `db:"token json:"token"`
+	UserId string `db:"user_id json:"user_id"`
+	Status bool   `db:"status json:"status"`
 }
 
 func DBConnection() *sqlx.DB {
@@ -58,7 +65,7 @@ func main() {
 	router := mux.NewRouter().StrictSlash(true)
 
 	router.HandleFunc("/", Index)
-	router.HandleFunc("/user/{id}/unotifications", ListUserNotifications).Methods("GET")
+	router.HandleFunc("/user/{id:[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}}/notifications", ListUserNotifications).Methods("GET")
 	router.HandleFunc("/notifications", CreateNotification).Methods("POST")
 	log.Fatal(http.ListenAndServe(":"+port, router))
 }
@@ -70,34 +77,22 @@ func Index(w http.ResponseWriter, r *http.Request) {
 func ListUserNotifications(w http.ResponseWriter, r *http.Request) {
 	// Get all notifications for user
 	vars := mux.Vars(r)
-	id, _ := strconv.ParseInt(vars["id"], 10, 0)
-	query := `SELECT * FROM notification n
-	JOIN user u ON u.email = n.user_email
-	WHERE n.user_email = $1`
-	notifications := []Notification{}
-	db.Select(&notifications, query, id)
+	id, _ := vars["id"]
+	query := `SELECT n.id, n.message, u.id as user_id, u.email as user_email, u.password as user_password FROM notification n
+	JOIN "user" u ON u.id = n.user_id
+	WHERE n.user_id = '$1'`
 
+	fmt.Printf("User ID %v", id)
+
+	notifications := []Notification{}
+
+	db.Select(&notifications, query, id)
+	fmt.Printf("Notifications: %v", notifications)
 	w.Header().Set("Content-Type", "application/json")
 
 	jsonString, _ := json.Marshal(notifications)
 
 	w.Write(jsonString)
-}
-
-func GetFoo(w http.ResponseWriter, r *http.Request) {
-	vars := mux.Vars(r)
-	id, _ := strconv.ParseInt(vars["id"], 10, 0)
-
-	var foo string
-
-	err := db.QueryRow("SELECT * FROM foo WHERE id = $1", id).Scan(&foo)
-
-	if err != nil {
-		log.Fatal(err)
-	}
-
-	// fmt.Print("foo: ", foo)
-	fmt.Fprintln(w, "Foo show:", foo)
 }
 
 func CreateNotification(w http.ResponseWriter, r *http.Request) {
