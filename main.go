@@ -24,7 +24,7 @@ type User struct {
 type Notification struct {
 	Id      string `db:"id json:"id"`
 	Message string `db:"message" json:"message"`
-	User    User
+	UserId  string `db:"user_id json:"user_id"`
 }
 
 type Token struct {
@@ -78,9 +78,7 @@ func ListUserNotifications(w http.ResponseWriter, r *http.Request) {
 	// Get all notifications for user
 	vars := mux.Vars(r)
 	id, _ := vars["id"]
-	query := `SELECT n.id, n.message, u.id as user_id, u.email as user_email, u.password as user_password FROM notification n
-	JOIN "user" u ON u.id = n.user_id
-	WHERE n.user_id = '$1'`
+	query := `SELECT n.id, n.message, n.user_id FROM notification n WHERE n.user_id = $1`
 
 	fmt.Printf("User ID %v", id)
 
