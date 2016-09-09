@@ -16,22 +16,22 @@ import (
 var db *sqlx.DB
 
 type User struct {
-	Id       string `db:"id json:"id"`
-	Email    string `db:"email json:"email"`
-	Password string `db:"password" json:"password"`
+	Id       string `json:"id" db:"id"`
+	Email    string `json:"email" db:"email"`
+	Password string `json:"password" db:"password"`
 }
 
 type Notification struct {
-	Id      string `db:"id json:"id"`
-	Message string `db:"message" json:"message"`
-	UserId  string `db:"user_id json:"user_id"`
+	Id      string `json:"id" db:"id"`
+	Message string `json:"message" db:"message"`
+	UserId  string `json:"user_id" db:"user_id"`
 }
 
 type Token struct {
-	Id     string `db:"id json:"id"`
-	Token  string `db:"token json:"token"`
-	UserId string `db:"user_id json:"user_id"`
-	Status bool   `db:"status json:"status"`
+	Id     string `json:"id" db:"id"`
+	Token  string `json:"token" db:"token"`
+	UserId string `json:"user_id" db:"user_id"`
+	Status bool   `json:"status" db:"status"`
 }
 
 func DBConnection() *sqlx.DB {
@@ -78,11 +78,11 @@ func ListUserNotifications(w http.ResponseWriter, r *http.Request) {
 	// Get all notifications for user
 	vars := mux.Vars(r)
 	id, _ := vars["id"]
-	query := `SELECT n.id, n.message, n.user_id FROM notification n WHERE n.user_id = $1`
+	query := `SELECT id, message, user_id FROM notification WHERE user_id = $1`
 
 	fmt.Printf("User ID %v", id)
 
-	notifications := []Notification{}
+	var notifications []*Notification
 
 	db.Select(&notifications, query, id)
 	fmt.Printf("Notifications: %v", notifications)
