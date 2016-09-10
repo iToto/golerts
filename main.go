@@ -66,9 +66,11 @@ func main() {
 	router := mux.NewRouter().StrictSlash(true)
 
 	router.HandleFunc("/", Index)
-	router.HandleFunc("/user/{id:[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}}/notifications", ListUserNotifications).Methods("GET")
+	router.HandleFunc("/users/{id:[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}}/notifications", ListUserNotifications).Methods("GET")
 	router.HandleFunc("/notifications", CreateNotification).Methods("POST")
 	router.HandleFunc("/login", UserLogin).Methods("POST")
+	router.HandleFunc("/tokens", CreateToken).Methods("POST")
+
 	log.Fatal(http.ListenAndServe(":"+port, router))
 }
 
@@ -125,7 +127,6 @@ func ListUserNotifications(w http.ResponseWriter, r *http.Request) {
 }
 
 func CreateNotification(w http.ResponseWriter, r *http.Request) {
-	// TODO
 	decoder := json.NewDecoder(r.Body)
 
 	var notification Notification
@@ -151,4 +152,31 @@ func CreateNotification(w http.ResponseWriter, r *http.Request) {
 
 	w.Write(jsonString)
 
+}
+
+func CreateToken(w http.ResponseWriter, r *http.Request) {
+	decoder := json.NewDecoder(r.Body)
+
+	var token Token
+
+	err := decoder.Decode(&token)
+	if err != nil {
+		log.Fatal(err)
+	}
+
+	id, err := uuid.NewV4()
+	if err != nil {
+		log.Fatal(err)
+	}
+
+	token.Id = id.String()
+	query := "INSERT INTO token (id, token, user_id, status) VALUES (:id, :token, :user_id, :status)"
+	_, err = db.NamedExec(query, &token)
+	if err != nil {
+		log.Fatal(err)
+	}
+
+	jsonString, _ := json.Marshal(token)
+
+	w.Write(jsonString)
 }
