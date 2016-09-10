@@ -11,6 +11,7 @@ import (
 	"os"
 
 	"github.com/gorilla/mux"
+	"github.com/nu7hatch/gouuid"
 )
 
 var db *sqlx.DB
@@ -95,4 +96,30 @@ func ListUserNotifications(w http.ResponseWriter, r *http.Request) {
 
 func CreateNotification(w http.ResponseWriter, r *http.Request) {
 	// TODO
+	decoder := json.NewDecoder(r.Body)
+
+	var notification Notification
+
+	err := decoder.Decode(&notification)
+	if err != nil {
+		log.Fatal(err)
+	}
+
+	u, err := uuid.NewV4()
+	if err != nil {
+		log.Fatal(err)
+	}
+
+	notification.Id = u.String()
+	query := "INSERT INTO notification (id, message, user_id) VALUES (:id, :message, :user_id)"
+	result, err := db.NamedExec(query, &notification)
+	if err != nil {
+		log.Fatal(err)
+	}
+
+	log.Printf("Result: %v", result)
+	jsonString, _ := json.Marshal(notification)
+
+	w.Write(jsonString)
+
 }
