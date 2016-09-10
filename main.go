@@ -45,7 +45,6 @@ func DBConnection() *sqlx.DB {
 	}
 
 	db, err := sqlx.Connect("postgres", dbURL)
-
 	if err != nil {
 		log.Fatal(err)
 	}
@@ -81,7 +80,6 @@ func UserLogin(w http.ResponseWriter, r *http.Request) {
 	var user User
 
 	err := decoder.Decode(&user)
-
 	if err != nil {
 		log.Fatal(err)
 	}
