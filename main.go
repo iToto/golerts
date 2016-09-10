@@ -65,10 +65,10 @@ func main() {
 	router := mux.NewRouter().StrictSlash(true)
 
 	router.HandleFunc("/", Index)
-	router.HandleFunc("/users/{id:[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}}/notifications", ListUserNotifications).Methods("GET")
-	router.HandleFunc("/notifications", CreateNotification).Methods("POST")
 	router.HandleFunc("/login", UserLogin).Methods("POST")
 	router.HandleFunc("/tokens", CreateToken).Methods("POST")
+	router.HandleFunc("/notifications", CreateNotification).Methods("POST")
+	router.HandleFunc("/users/{id:[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}}/notifications", ListUserNotifications).Methods("GET")
 
 	log.Fatal(http.ListenAndServe(":"+port, router))
 }
@@ -147,6 +147,8 @@ func CreateNotification(w http.ResponseWriter, r *http.Request) {
 	}
 
 	jsonString, _ := json.Marshal(notification)
+
+	// TODO: Make call to Apple Servers to broadcast notification to user's device
 
 	w.Write(jsonString)
 
