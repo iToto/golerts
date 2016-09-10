@@ -68,7 +68,37 @@ func main() {
 	router.HandleFunc("/", Index)
 	router.HandleFunc("/user/{id:[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}}/notifications", ListUserNotifications).Methods("GET")
 	router.HandleFunc("/notifications", CreateNotification).Methods("POST")
+	router.HandleFunc("/login", UserLogin).Methods("POST")
 	log.Fatal(http.ListenAndServe(":"+port, router))
+}
+
+/// UserLogin will register a user with the service so that they can receive notifications
+func UserLogin(w http.ResponseWriter, r *http.Request) {
+	decoder := json.NewDecoder(r.Body)
+
+	var user User
+
+	err := decoder.Decode(&user)
+
+	if err != nil {
+		log.Fatal(err)
+	}
+
+	id, err := uuid.NewV4()
+	if err != nil {
+		log.Fatal(err)
+	}
+
+	user.Id = id.String()
+	query := "INSERT INTO \"user\" (id, email, password) VALUES (:id, :email, :password)"
+	_, err = db.NamedExec(query, &user)
+	if err != nil {
+		log.Fatal(err)
+	}
+
+	jsonString, _ := json.Marshal(user)
+
+	w.Write(jsonString)
 }
 
 func Index(w http.ResponseWriter, r *http.Request) {
@@ -112,12 +142,11 @@ func CreateNotification(w http.ResponseWriter, r *http.Request) {
 
 	notification.Id = u.String()
 	query := "INSERT INTO notification (id, message, user_id) VALUES (:id, :message, :user_id)"
-	result, err := db.NamedExec(query, &notification)
+	_, err = db.NamedExec(query, &notification)
 	if err != nil {
 		log.Fatal(err)
 	}
 
-	log.Printf("Result: %v", result)
 	jsonString, _ := json.Marshal(notification)
 
 	w.Write(jsonString)
