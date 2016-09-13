@@ -12,9 +12,12 @@ import (
 
 	"github.com/gorilla/mux"
 	"github.com/nu7hatch/gouuid"
+	apns "github.com/sideshow/apns2"
+	"github.com/sideshow/apns2/certificate"
 )
 
 var db *sqlx.DB
+var apnsClient *apns.Client
 
 type User struct {
 	Id       string `json:"id" db:"id"`
@@ -52,6 +55,16 @@ func DBConnection() *sqlx.DB {
 	return db
 }
 
+func APNSConnection() *apns.Client {
+	// TODO: This should be done through configuration
+	cert, err := certificate.FromPemFile("cert.cer", "")
+	if err != nil {
+		log.Fatal(err)
+	}
+
+	return apns.NewClient(cert).Production()
+}
+
 func main() {
 	port := os.Getenv("PORT")
 
@@ -62,6 +75,7 @@ func main() {
 	}
 
 	db = DBConnection()
+	apnsClient = APNSConnection()
 	router := mux.NewRouter().StrictSlash(true)
 
 	router.HandleFunc("/", Index)
@@ -134,6 +148,23 @@ func CreateNotification(w http.ResponseWriter, r *http.Request) {
 		log.Fatal(err)
 	}
 
+	// TODO: Get user's token
+	token := getActiveTokenForUserId(notification.UserId)
+
+	// Send notification to APNS server
+	apnsNotification := &apns.Notification{}
+	apnsNotification.DeviceToken = token.Token
+	apnsNotification.Topic = "com.sideshow.Apns2"
+	apnsNotification.Payload = []byte(`{"aps":{"alert":"Hello!"}}`) // See Payload section below
+
+	res, err := apnsClient.Push(apnsNotification)
+
+	if err != nil {
+		log.Fatal(err)
+	}
+
+	log.Println("APNs ID:", res.ApnsID)
+
 	u, err := uuid.NewV4()
 	if err != nil {
 		log.Fatal(err)
@@ -179,4 +210,31 @@ func CreateToken(w http.ResponseWriter, r *http.Request) {
 	jsonString, _ := json.Marshal(token)
 
 	w.Write(jsonString)
+}
+
+func getUserById(userId string) *User {
+	var user User
+	query := "SELECT * FROM \"user\" WHERE id = $1"
+
+	err := db.Get(&user, query, userId)
+	if err != nil {
+		log.Fatal(err)
+	}
+	fmt.Printf("User with id: %v", user)
+
+	return &user
+}
+
+func getActiveTokenForUserId(userId string) *Token {
+	var token Token
+	query := "SELECT * FROM token WHERE user_id = $1 AND status = TRUE"
+
+	err := db.Get(&token, query, userId)
+	if err != nil {
+		log.Fatal(err)
+	}
+
+	fmt.Printf("Token for user", token)
+
+	return &token
 }
