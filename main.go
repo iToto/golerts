@@ -38,6 +38,14 @@ type Token struct {
 	Status bool   `json:"status" db:"status"`
 }
 
+const banner = `
+(_______|_______|_)     (_______|_____ (_______) _____)
+ _   ___ _     _ _       _____   _____) )  _  ( (____
+| | (_  | |   | | |     |  ___) |  __  /  | |  \____ \
+| |___) | |___| | |_____| |_____| |  \ \  | |  _____) )
+ \_____/ \_____/|_______)_______)_|   |_| |_| (______/
+`
+
 func DBConnection() *sqlx.DB {
 	dbURL := os.Getenv("DATABASE_URL")
 
@@ -57,7 +65,7 @@ func DBConnection() *sqlx.DB {
 
 func APNSConnection() *apns.Client {
 	// TODO: This should be done through configuration
-	cert, err := certificate.FromPemFile("cert.cer", "")
+	cert, err := certificate.FromP12File("devPush.p12", "aaaaaaaaAA$%")
 	if err != nil {
 		log.Fatal(err)
 	}
