@@ -1,12 +1,8 @@
 {
 	"ImportPath": "github.com/iToto/golerts",
-	"GoVersion": "go1.6",
+	"GoVersion": "go1.7",
 	"GodepVersion": "v74",
 	"Deps": [
-		{
-			"ImportPath": "github.com/gorilla/context",
-			"Rev": "215affda49addc4c8ef7e2534915df2c8c35c6cd"
-		},
 		{
 			"ImportPath": "github.com/gorilla/mux",
 			"Comment": "v1.1-13-g9fa818a",
@@ -31,6 +27,44 @@
 			"ImportPath": "github.com/lib/pq/oid",
 			"Comment": "go1.0-cutoff-101-g55196ec",
 			"Rev": "55196ec83d60d789e27b2627549bf00974a70084"
+		},
+		{
+			"ImportPath": "github.com/nu7hatch/gouuid",
+			"Rev": "179d4d0c4d8d407a32af483c2354df1d2c91e6c3"
+		},
+		{
+			"ImportPath": "github.com/sideshow/apns2",
+			"Comment": "v0.7-5-g0ef66aa",
+			"Rev": "0ef66aa028afcef5a6337280ecf90aae9de706c5"
+		},
+		{
+			"ImportPath": "github.com/sideshow/apns2/certificate",
+			"Comment": "v0.7-5-g0ef66aa",
+			"Rev": "0ef66aa028afcef5a6337280ecf90aae9de706c5"
+		},
+		{
+			"ImportPath": "golang.org/x/crypto/pkcs12",
+			"Rev": "e311231e83195f401421a286060d65643f9c9d40"
+		},
+		{
+			"ImportPath": "golang.org/x/crypto/pkcs12/internal/rc2",
+			"Rev": "e311231e83195f401421a286060d65643f9c9d40"
+		},
+		{
+			"ImportPath": "golang.org/x/net/http2",
+			"Rev": "749a502dd1eaf3e5bfd4f8956748c502357c0bbe"
+		},
+		{
+			"ImportPath": "golang.org/x/net/http2/hpack",
+			"Rev": "749a502dd1eaf3e5bfd4f8956748c502357c0bbe"
+		},
+		{
+			"ImportPath": "golang.org/x/net/idna",
+			"Rev": "749a502dd1eaf3e5bfd4f8956748c502357c0bbe"
+		},
+		{
+			"ImportPath": "golang.org/x/net/lex/httplex",
+			"Rev": "749a502dd1eaf3e5bfd4f8956748c502357c0bbe"
 		}
 	]
 }
