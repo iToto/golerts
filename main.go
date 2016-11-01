@@ -52,7 +52,7 @@ func DBConnection() *sqlx.DB {
 	if dbURL == "" {
 		log.Fatal("$DATABASE_URL environment variable must be set")
 	} else {
-		fmt.Println("Connected to database: " + dbURL)
+		log.Println("Connected to database: " + dbURL)
 	}
 
 	db, err := sqlx.Connect("postgres", dbURL)
@@ -70,6 +70,7 @@ func APNSConnection() *apns.Client {
 		log.Fatal(err)
 	}
 
+	log.Println("Connected to APNS")
 	return apns.NewClient(cert).Production()
 }
 
@@ -162,8 +163,8 @@ func CreateNotification(w http.ResponseWriter, r *http.Request) {
 	// Send notification to APNS server
 	apnsNotification := &apns.Notification{}
 	apnsNotification.DeviceToken = token.Token
-	apnsNotification.Topic = "com.sideshow.Apns2"
-	apnsNotification.Payload = []byte(`{"aps":{"alert":"Hello!"}}`) // See Payload section below
+	apnsNotification.Topic = "com.iToto.golerts"
+	apnsNotification.Payload = []byte(`{"aps":{"alert":"Hello World!"}}`) // See Payload section below
 
 	res, err := apnsClient.Push(apnsNotification)
 
