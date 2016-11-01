@@ -164,7 +164,7 @@ func CreateNotification(w http.ResponseWriter, r *http.Request) {
 	apnsNotification := &apns.Notification{}
 	apnsNotification.DeviceToken = token.Token
 	apnsNotification.Topic = "com.iToto.golerts"
-	apnsNotification.Payload = []byte(`{"aps":{"alert":"Hello World!"}}`) // See Payload section below
+	apnsNotification.Payload = []byte(`{"aps":{"alert":"Hello World!"}}`)
 
 	res, err := apnsClient.Push(apnsNotification)
 
